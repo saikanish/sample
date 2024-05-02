@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grouped Bar Chart</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div id="chart"></div>
+
+    <script>
+        // Sample data
+        const data = [
+            { Category: "product A", "Units Sold": 1120, Revenue: 12803456 },
+            { Category: "product B", "Units Sold": 1140, Revenue: 12908456 }
+        ];
+
+        // Set up SVG canvas
+        const svgWidth = 600;
+        const svgHeight = 400;
+        const margin = { top: 30, right: 30, bottom: 70, left: 60 };
+        const width = svgWidth - margin.left - margin.right;
+        const height = svgHeight - margin.top - margin.bottom;
+
+        const svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", svgWidth)
+            .attr("height", svgHeight)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Set up scales
+        const xScale = d3.scaleBand()
+            .domain(data.map(d => d.Category))
+            .range([0, width])
+            .padding(0.2);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, d3.max(data, d => Math.max(d["Units Sold"], d.Revenue))])
+            .nice()
+            .range([height, 0]);
+
+        // Draw bars for Units Sold
+        svg.selectAll(".bar-units-sold")
+            .data(data)
+            .enter().append("rect")
+            .attr("class", "bar-units-sold")
+            .attr("x", d => xScale(d.Category))
+            .attr("y", d => yScale(d["Units Sold"]))
+            .attr("width", xScale.bandwidth() / 2)
+            .attr("height", d => height - yScale(d["Units Sold"]))
+            .attr("fill", "steelblue");
+
+        // Draw bars for Revenue
+        svg.selectAll(".bar-revenue")
+            .data(data)
+            .enter().append("rect")
+            .attr("class", "bar-revenue")
+            .attr("x", d => xScale(d.Category) + xScale.bandwidth() / 2)
+            .attr("y", d => yScale(d.Revenue))
+            .attr("width", xScale.bandwidth() / 2)
+            .attr("height", d => height - yScale(d.Revenue))
+            .attr("fill", "orange");
+
+        // Draw x-axis
+        svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(xScale));
+
+        // Draw y-axis
+        svg.append("g")
+            .call(d3.axisLeft(yScale));
+
+        // Add legend
+        svg.append("rect")
+            .attr("x", width - 100)
+            .attr("y", 10)
+            .attr("width", 20)
+            .attr("height", 20)
+            .attr("fill", "steelblue");
+
+        svg.append("rect")
+            .attr("x", width - 100)
+            .attr("y", 40)
+            .attr("width", 20)
+            .attr("height", 20)
+            .attr("fill", "orange");
+
+        svg.append("text")
+            .attr("x", width - 70)
+            .attr("y", 20)
+            .text("Units Sold")
+            .style("font-size", "12px");
+
+        svg.append("text")
+            .attr("x", width - 70)
+            .attr("y", 50)
+            .text("Revenue")
+            .style("font-size", "12px");
+
+    </script>
+</body>
+</html>
